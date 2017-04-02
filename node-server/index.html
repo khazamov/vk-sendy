@@ -1,0 +1,206 @@
+<html>
+
+<head>
+    <title> VK-poster </title>
+    <style>
+        body {
+            background-color: #f05133;
+            color: #efaa9d;
+            text-align: center;
+            font-family: Lato, Tahoma, sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-weight: normal;
+        }
+
+        p a {
+            color: #f4f2ca;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, .2);
+            padding: .2em 0;
+            -webkit-transition: all .2s linear;
+            -moz-transition: all .2s linear;
+            transition: all .2s linear;
+        }
+
+        p a:hover {
+            color: #f4f2ca;
+            opacity: .6;
+        }
+
+        ::-webkit-input-placeholder {
+            color: #f4f2ca;
+            opacity: .8;
+        }
+
+        .input-field {
+            width: 120px;
+            display: inline-block;
+            color: #f4f2ca;
+            text-align: center;
+            background-color: #d8492e;
+            padding: .9em 1.8em;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+            -webkit-transition: all .1s linear;
+            -moz-transition: all .1s linear;
+            transition: all .1s linear;
+        }
+
+        .input-field:hover {
+            background-color: #d0432a;
+        }
+
+
+        .input-field.active {
+            width: 200px;
+            outline: none;
+            color: #efaa9d;
+            text-align: left;
+            cursor: inherit;
+        }
+
+
+        #subscribe-button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            text-indent: -9999px;
+            opacity: .25;
+            background: url(https://ucarecdn.com/7dbde6fd-0080-47a5-b9d7-81e2f63e2b3a/arrowcircleonright.svg) no-repeat;
+            background-size: 13px;
+            background-position: 0 1px;
+            -webkit-transition: all .2s linear;
+            -moz-transition: all .2s linear;
+            transition: all .2s linear;
+
+            cursor: pointer;
+
+            display: none;
+        }
+
+        #subscribe-button:hover {
+            opacity: .33;
+        }
+
+        #subscribe-button.show {
+            display: inline-block;
+            background-size: 33px;
+        }
+
+
+        @media screen and (min-width: 480px) {
+
+            .middle {
+                width: 100%;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translateX(-50%) translateY(-50%);
+            }
+
+            footer {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+            }
+        }
+    </style>
+
+</head>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+
+
+<body>
+
+    <div class="wrapper">
+
+        <div class="middle" style="float: right;">
+
+            <h2>Спасибо, что зашли. Будем крутить-раскручивать!</h2>
+
+            </br>
+
+            <p>Сначала нужно получить токен <a href="https://oauth.vk.com/authorize?client_id=5816817&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=wall,groups,friends,offline,messages&response_type=token&v=5.62"> здесь </a>.</p>
+            </br>
+            </br>
+
+
+
+
+
+            <input type="text" value="" name="input-field" class="input-field" id="input-field" placeholder="Получили?">
+
+            <input type="submit" value="Subscribe" name="subscribe" id="subscribe-button" onClick="triggerCollection()" class="">
+        </div>
+        <div style="float: left;">
+            <p id="serverMessages">
+
+            </p>
+        </div>
+
+    </div>
+    <!-- /wrapper -->
+
+
+
+
+</body>
+<script>
+    var baseURL = 'http://vk-sendy.herokuapp.com/';
+
+    window.onload = function() {
+        var messages = [];
+        var socket = io.connect(baseURL);
+        $('#input-field').click(function() {
+            $(this).addClass("active");
+            $(this).attr('placeholder', 'Введите токен...');
+            $('#subscribe-button').addClass("show");
+        });
+
+        var content = $('#serverMessages');
+        socket.on('message', function(data) {
+            console.log('got message from the server  ' + data.message);
+            if (data.message) {
+                messages.push(data);
+                var html = '';
+                for (var i = 0; i < messages.length; i++) {
+                    html += '<b>' + (messages[i].username ? messages[i].username : 'Server') + ': </b>';
+                    html += '<p>' + messages[i].message + ' </p> <br />';
+                }
+                content.html(html);
+            } else {
+                console.log("There is a problem:", data);
+            }
+        });
+    }
+
+    function triggerCollection() {
+
+        at = $('#input-field').val();
+        if (at == '' || at.length != 85) {
+            alert('Не задан или неверно введен токен.');
+        } else {
+            $.ajax({
+                url: baseURL + 'msgnow?at=' + at,
+                type: 'GET',
+                contentType: 'application/json',
+            }).done(function() {});
+        };
+    }
+</script>
+
+</html>
